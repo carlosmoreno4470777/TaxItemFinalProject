@@ -23,7 +23,7 @@ public class Item {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long itemId;
-
+	
     @Column(name = "tax_rate_id", nullable = false)
     private Long taxRateId;
 
@@ -32,7 +32,7 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "tax_rate_id", insertable = false, updatable = false)
     private Taxrate taxRate;
-
+	
     private String name;
     private String description;
     private BigDecimal basePrice;
