@@ -1,22 +1,12 @@
 "# TaxItemFinalProject" 
 
-• Entity Ideas: Users, Customer, Item, Tax Rate, Items belong to Customer.
-
-• Login, and use system
-
-• Browse all customers (GET all customers)
-
-• Browse all items (GET on items)
-
-• Browse Items by customer (GET details of a specific customer by ID)
-
-• View all details about a specific item (GET details of a specific item by ID)
-
-• Add a new item (POST Create a new item)
-
-• Tax change establish by the state (Put details of an existing tax rate)
-
-• Show all items for a specific rate (GET Retrieve details of a specific tax rate by ID
+The requirements are:
+    1. At least 3 entities/tables.
+    2. At least 1 one-to-many relationship.
+    3. At least 1 many-to-many relationship, with a join table shown in the ERD.
+    4. One table must have all 4 CRUD operations
+    5. The remaining tables, including the join table, must have at least 1 CRUD operation each.
+    6. The application should be a RESTful web API, tested using Advanced Rest Client (ARC), Postman, or a front-end client.
 
 
 ![ERD projects](https://github.com/carlosmoreno4470777/TaxItemFinalProject/blob/main/tax-items/src/main/resources/ERDFinal.png)
