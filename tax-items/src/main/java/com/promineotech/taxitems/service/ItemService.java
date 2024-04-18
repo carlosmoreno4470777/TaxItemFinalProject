@@ -1,5 +1,7 @@
 package com.promineotech.taxitems.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -7,10 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.promineotech.taxitems.controller.model.CustomerData;
 import com.promineotech.taxitems.controller.model.ItemData;
 import com.promineotech.taxitems.controller.model.TaxrateData;
+import com.promineotech.taxitems.dao.CustomerDao;
 import com.promineotech.taxitems.dao.ItemDao;
 import com.promineotech.taxitems.dao.TaxrateDao;
+import com.promineotech.taxitems.entity.Customer;
 import com.promineotech.taxitems.entity.Item;
 import com.promineotech.taxitems.entity.Taxrate;
 
@@ -22,10 +27,13 @@ public class ItemService {
 	  
 	  @Autowired
 	  private ItemDao itemDao;
+	  
+	  @Autowired
+	  private CustomerDao customerDao;
 	
 	  @Transactional(readOnly = false)
 	  public TaxrateData saveTaxrate(TaxrateData taxrateData) {
-		  
+		
 		Long taxRateId = taxrateData.getTaxRateId();
 		Taxrate taxRate = findOrCreateTaxrate(taxRateId);
 		copyTaxRateFields(taxRate,taxrateData);
@@ -35,38 +43,38 @@ public class ItemService {
 	  
 	  @Transactional(readOnly = false)
 	  public ItemData saveItem(Long taxRateId, ItemData itemData) {
-		  System.out.println("ZZZZZZZZ   IN saveItem  taxRateId : "+ taxRateId);
 		  
-		  Taxrate taxRate = findTaxrateByID(taxRateId);
-		  System.out.println("ZZZZZZZZZZZZ  object taxRate  "+taxRate.toString());
-		  
-		  Long itemId = itemData.getItemId();
-		  System.out.println("ZZZZZZZZZZZZ  what is the  itemId "+itemId);
-		  
-		  Item item = findOrCreateItem(itemId);
-		  System.out.println("ZZZZZZZZZ  the item object "+item.toString());
-		  
-		  System.out.println("ZZZZZZZZZZZ   itemData BEFORE copyItemFields   "+itemData.toString());
+		  Taxrate taxRate = findTaxrateByID(taxRateId);		  
+		  Long itemId = itemData.getItemId();		  
+		  Item item = findOrCreateItem(itemId);		  
 		  copyItemFields(item,itemData);
-		  System.out.println("ZZZZZZZZZZZ   petpark after copyItemFields   "+item.toString());
 		  
 		  item.setTaxRate(taxRate);
 		  taxRate.getItems().add(item);
 		  item.setTaxRateId(taxRate.getTaxRateId());
-		  System.out.println("ZZZZZZZZZ  the item object before itemDao.save  "+item.toString());
 		  Item dbItemData = itemDao.save(item);
-		  System.out.println("ZZZZZZZZZ  the item object AFTER itemDao.save  "+item.toString());
 		  return new ItemData(dbItemData);
 
 	}
+
+	  /**
+	   * Delete a item given the item ID
+	   */
+		@Transactional(readOnly = false)
+		public void deleteItemById(Long itemId) {
+			Item item = findItemByID(itemId);
+			  // Delete associated customers before deleting the item
+			  for (Customer customer : item.getCustomers()) {
+			    customer.getItems().remove(item); // Remove association from Customer side
+			  }
+			itemDao.delete(item);
+		}
 
 
 	private Item findOrCreateItem(Long itemId) {
 		Item item;
 		if (Objects.isNull(itemId)) {
-			System.out.println("ZZZZZZZZZZZZZZ  ARE YOU COING HERE TO CREATE A NEW ITEM?????? ");
 			item = new Item();
-			System.out.println("Cfreated NEW item in the findOrCreateItem "+item.toString());
 		} else {				
 			item = findItemByID(itemId);
 		}
@@ -104,7 +112,6 @@ public class ItemService {
 			item.setName(itemData.getName());
 			item.setDescription(itemData.getDescription());
 			item.setBasePrice(itemData.getBasePrice());
-			//item.setTaxRateId(null);
 			
 		}
 		  
@@ -114,5 +121,47 @@ public class ItemService {
 			
 		}
 
+		public ItemData retrieveItemById(Long taxRateId, Long itemId) {
+			findTaxrateByID(taxRateId);
+			Item item = findItemByID(itemId);
+			if(item.getTaxRate().getTaxRateId() != taxRateId ) {
+				throw new IllegalStateException("Item with ID=" + itemId 
+						+ " is not owned by Taxrate with ID= " + taxRateId);
+			}
+			return new ItemData(item);
+			
+		}
+
+		public List<CustomerData> retrieveAllCustomers() {
+			// Implement logic to retrieve all customers
+		      List<Customer> customers = customerDao.findAll();
+		      
+		      // Convert retrieved customers to CustomerData objects
+		      List<CustomerData> customerDataList = new ArrayList<>();
+		      for (Customer customer : customers) {
+		        customerDataList.add(new CustomerData(customer));
+		      }
+		      
+		      return customerDataList;
+		}
+		
+		  @Transactional(readOnly = false)
+		  public CustomerData insertCustomerItem(Long customerId, Long itemId) {
+		    Customer customer = customerDao.findById(customerId)
+		        .orElseThrow(() -> new NoSuchElementException("Customer with ID " + customerId + " not found"));
+		    Item item = findItemByID(itemId);
+
+		    // Check if the association already exists
+		    if (customer.getItems().stream().anyMatch(i -> i.getItemId().equals(itemId))) {
+		      throw new IllegalArgumentException("Customer with ID " + customerId + " already has item with ID " + itemId);
+		    }
+
+		    customer.getItems().add(item);
+		    item.getCustomers().add(customer);
+
+		    customerDao.save(customer);
+
+		    return new CustomerData(customer);
+		  }
 
 }

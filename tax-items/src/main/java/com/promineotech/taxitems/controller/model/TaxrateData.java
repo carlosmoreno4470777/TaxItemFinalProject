@@ -18,7 +18,6 @@ public class TaxrateData {
 	  private Long taxRateId;
 	  private BigDecimal rate;
 	  private String name;
-	  //private Set<Item> items = new HashSet<>();
 	  private Set<ItemResponse> items = new HashSet<>();
   
 	  //Constructor that converts a Taxrate object to a TaxrateData object	 

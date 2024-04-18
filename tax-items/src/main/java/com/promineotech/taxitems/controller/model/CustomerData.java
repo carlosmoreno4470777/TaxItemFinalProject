@@ -21,10 +21,8 @@ public class CustomerData {
 	  private String firstName;
 	  private String lastName;
 	  private String email;
-	  private Integer cardNumber;
-	  
+	  private Integer cardNumber;	  
 	  private Set<CustomerItem> items = new HashSet<>();
-	  //    private Set<Item> items = new HashSet<>();
 
 	  //Constructor that converts a Customer object to a CustomerData object
 	  public CustomerData(Customer customer) {
@@ -47,8 +45,6 @@ public class CustomerData {
 		  private String name;
 		  private String description;
 		  private BigDecimal basePrice;
-		  //private Taxrate taxRateId;
-		  //private Taxrate rate;
 		  		  
 		    //constructor
 	        CustomerItem(Item items) { 
@@ -56,11 +52,7 @@ public class CustomerData {
 		    	name = items.getName();
 		    	description = items.getDescription();
 		    	basePrice = items.getBasePrice();
-		    	//taxRateId = items.getTaxRate();
-		    	//rate = items.getTaxRate();
 			 }
 		}
-	  
-	  
-	  
+	    
 }
